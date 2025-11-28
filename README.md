@@ -175,12 +175,3 @@ https://USERNAME.github.io/iafps-vmdutm/
 - Mașinile sunt sortate descrescător după scor.
 
 ---
-
-## 6. Ce spui profesorului
-
-> Proiectul meu folosește un motor C++ compilat în WebAssembly care rulează direct în browser.
-> Algoritmii AC‑3, AHP și TOPSIS sunt implementați în C++, iar interfața HTML/JS doar trimite preferințele
-> utilizatorului către funcția C++ `computeRanking`, care întoarce un JSON cu toate configurațiile de mașini
-> filtrate și sortate descrescător după scorul TOPSIS.
-
-Succes la prezentare! 🚗💻
