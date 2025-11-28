@@ -1,37 +1,346 @@
+
 <!DOCTYPE html>
 <html lang="ro">
 <head>
   <meta charset="UTF-8" />
-  <title>Configurarea mașinii tale</title>
+  <title>Configurarea mașinii tale – WebAssembly</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="icon" href="favicon.ico">
   <style>
-    /* aici pui stilurile (carduri, header, filtre etc.)
-       – poți copia stilul din proiectul nostru HTML anterior */
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #020617;
+      color: #e5e7eb;
+    }
+    header {
+      background: radial-gradient(circle at top, #22d3ee, #0f172a 55%);
+      padding: 1.5rem 1.25rem 1.75rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      box-shadow: 0 15px 30px rgba(15,23,42,0.7);
+      position: sticky;
+      top: 0;
+      z-index: 20;
+    }
+    header img {
+      height: 52px;
+      filter: drop-shadow(0 0 6px rgba(56,189,248,0.7));
+    }
+    header h1 {
+      margin: 0;
+      font-size: 1.6rem;
+      letter-spacing: 0.03em;
+    }
+    header p {
+      margin: 0.25rem 0 0;
+      font-size: 0.85rem;
+      color: #cbd5f5;
+    }
+    main {
+      max-width: 1200px;
+      margin: 1.5rem auto 2rem;
+      padding: 0 1rem;
+    }
+    .card {
+      background: rgba(15,23,42,0.95);
+      border-radius: 1rem;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 20px 50px rgba(15,23,42,0.9);
+      border: 1px solid rgba(148,163,184,0.3);
+    }
+    .card h2 {
+      margin-top: 0;
+      font-size: 1.3rem;
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+    .pill {
+      font-size: 0.7rem;
+      padding: 0.1rem 0.5rem;
+      border-radius: 999px;
+      background: rgba(15,118,110,0.2);
+      border: 1px solid rgba(45,212,191,0.4);
+      color: #a5f3fc;
+    }
+    .section-grid {
+      display: grid;
+      grid-template-columns: minmax(0,1.2fr) minmax(0,1fr);
+      gap: 1.25rem;
+    }
+    .filters, .ahp-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 0.9rem;
+    }
+    label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #9ca3af;
+      display: block;
+      margin-bottom: 0.25rem;
+    }
+    input, select {
+      width: 100%;
+      padding: 0.45rem 0.6rem;
+      border-radius: 0.55rem;
+      border: 1px solid #334155;
+      background: #020617;
+      color: #e5e7eb;
+      font-size: 0.9rem;
+      outline: none;
+    }
+    input:focus, select:focus {
+      border-color: #22d3ee;
+      box-shadow: 0 0 0 2px rgba(34,211,238,0.3);
+    }
+    .btn-row {
+      margin-top: 1rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    button {
+      border-radius: 999px;
+      border: none;
+      padding: 0.55rem 1.4rem;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      background: linear-gradient(135deg,#22c55e,#22d3ee);
+      color: #0f172a;
+      box-shadow: 0 10px 25px rgba(34,197,94,0.4);
+      transition: transform 0.05s, box-shadow 0.1s, filter 0.1s;
+    }
+    button:hover {
+      filter: brightness(1.05);
+      transform: translateY(-1px);
+      box-shadow: 0 14px 30px rgba(34,211,238,0.5);
+    }
+    button:active {
+      transform: translateY(0);
+      box-shadow: 0 8px 20px rgba(34,197,94,0.35);
+    }
+    .info {
+      margin-top: 0.75rem;
+      font-size: 0.85rem;
+      color: #9ca3af;
+    }
+    .grid-cars {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+    .car-card {
+      border-radius: 0.9rem;
+      padding: 0.9rem;
+      background: radial-gradient(circle at top,#0f172a,#020617 55%);
+      border: 1px solid rgba(148,163,184,0.4);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+      overflow: hidden;
+    }
+    .car-card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at top right, rgba(34,211,238,0.22), transparent 55%);
+      opacity: 0.9;
+      pointer-events: none;
+    }
+    .car-inner {
+      position: relative;
+      z-index: 1;
+    }
+    .car-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .car-title {
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: #e5e7eb;
+    }
+    .car-score {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #22d3ee;
+      background: rgba(15,23,42,0.9);
+      padding: 0.15rem 0.5rem;
+      border-radius: 999px;
+      border: 1px solid rgba(56,189,248,0.6);
+    }
+    .car-specs {
+      font-size: 0.8rem;
+      color: #9ca3af;
+      margin-top: 0.25rem;
+      line-height: 1.5;
+    }
+    .badge {
+      display: inline-block;
+      font-size: 0.7rem;
+      border-radius: 999px;
+      padding: 0.15rem 0.45rem;
+      background: rgba(15,23,42,0.85);
+      border: 1px solid rgba(148,163,184,0.5);
+      color: #e5e7eb;
+      margin-right: 0.3rem;
+      margin-top: 0.15rem;
+    }
+    .car-price {
+      margin-top: 0.6rem;
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #4ade80;
+    }
+    .ahp-grid small {
+      font-size: 0.7rem;
+      color: #64748b;
+    }
+    footer {
+      text-align: center;
+      font-size: 0.8rem;
+      color: #6b7280;
+      margin-bottom: 1.5rem;
+    }
+    .runtime-status {
+      font-size: 0.8rem;
+      color: #22d3ee;
+      margin-top: 0.3rem;
+    }
+    @media (max-width: 768px) {
+      header {
+        flex-direction: row;
+        align-items: center;
+      }
+      header h1 {
+        font-size: 1.15rem;
+      }
+      .section-grid {
+        grid-template-columns: minmax(0,1fr);
+      }
+    }
   </style>
 </head>
 <body>
-  <header>
-    <img src="logo.svg" alt="Logo" style="height:48px;vertical-align:middle;">
+<header>
+  <img src="logo.svg" alt="Logo configurator" />
+  <div>
     <h1>Configurarea mașinii tale</h1>
-    <p>AC-3 · AHP · TOPSIS – totul rulează în browser</p>
-  </header>
+    <p>AC‑3 · AHP · TOPSIS &mdash; motor C++ rulat în browser prin WebAssembly</p>
+  </div>
+</header>
 
-  <main>
-    <!-- filtre, slider-e AHP, buton „Calculează” -->
-    <section id="filters">
-      <!-- inputs: buget, putere minimă, combustibil, cutie, tracțiune -->
-    </section>
+<main>
+  <section class="card">
+    <div class="section-grid">
+      <div>
+        <h2>Filtru configurații <span class="pill">AC‑3 + TOPSIS</span></h2>
+        <div class="filters">
+          <div>
+            <label for="maxPrice">Buget maxim (MDL)</label>
+            <input id="maxPrice" type="number" placeholder="ex: 400000" />
+          </div>
+          <div>
+            <label for="minPower">Putere minimă (CP)</label>
+            <input id="minPower" type="number" placeholder="ex: 120" />
+          </div>
+          <div>
+            <label for="fuel">Combustibil</label>
+            <select id="fuel">
+              <option value="-1">Orice</option>
+              <option value="0">Benzină</option>
+              <option value="1">Motorină</option>
+              <option value="2">Hybrid</option>
+              <option value="3">Electric</option>
+            </select>
+          </div>
+          <div>
+            <label for="gearbox">Cutie de viteze</label>
+            <select id="gearbox">
+              <option value="-1">Orice</option>
+              <option value="0">Manuală</option>
+              <option value="1">Automată</option>
+            </select>
+          </div>
+          <div>
+            <label for="drivetrain">Tracțiune</label>
+            <select id="drivetrain">
+              <option value="-1">Orice</option>
+              <option value="0">Față</option>
+              <option value="1">Spate</option>
+              <option value="2">Integrală</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div>
+        <h2>AHP – importanța criteriilor <span class="pill">Siguranță / Confort / Preț / Tehnologie</span></h2>
+        <p style="font-size:0.8rem;color:#9ca3af;margin-top:0;">
+          Valorile sunt comparații perechi de tip Saaty între criterii (0 = egal, 1..9 = cât de mult este mai important primul față de al doilea, valori negative = invers).
+        </p>
+        <div class="ahp-grid">
+          <div>
+            <label>Siguranță vs Confort</label>
+            <input id="ahp_sc" type="number" min="-9" max="9" value="1" />
+            <small>pozitiv: Siguranța &gt; Confort</small>
+          </div>
+          <div>
+            <label>Siguranță vs Preț</label>
+            <input id="ahp_sp" type="number" min="-9" max="9" value="3" />
+            <small>pozitiv: Siguranța &gt; Preț</small>
+          </div>
+          <div>
+            <label>Siguranță vs Tehnologie</label>
+            <input id="ahp_st" type="number" min="-9" max="9" value="2" />
+            <small>pozitiv: Siguranța &gt; Tehnologie</small>
+          </div>
+          <div>
+            <label>Confort vs Preț</label>
+            <input id="ahp_cp" type="number" min="-9" max="9" value="1" />
+            <small>pozitiv: Confort &gt; Preț</small>
+          </div>
+          <div>
+            <label>Confort vs Tehnologie</label>
+            <input id="ahp_ct" type="number" min="-9" max="9" value="1" />
+            <small>pozitiv: Confort &gt; Tehnologie</small>
+          </div>
+          <div>
+            <label>Preț vs Tehnologie</label>
+            <input id="ahp_pt" type="number" min="-9" max="9" value="-2" />
+            <small>negativ: Tehnologia &gt; Preț</small>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button id="btnCalc" disabled>Calculează recomandările</button>
+      <span id="runtimeStatus" class="runtime-status">Se încarcă motorul C++ (WebAssembly)...</span>
+    </div>
+    <div id="info" class="info">
+      Introdu preferințele și apasă „Calculează recomandările”. Vor fi folosite: AC‑3 pentru compatibilitate, AHP pentru ponderi și TOPSIS pentru clasament.
+    </div>
+  </section>
 
-    <section id="ahp">
-      <!-- slider-e sau input-uri pentru importanța criteriilor -->
-    </section>
+  <section class="card">
+    <h2>Clasament mașini (TOPSIS descrescător)</h2>
+    <div id="cars" class="grid-cars"></div>
+  </section>
+</main>
 
-    <section id="results">
-      <!-- aici vor apărea cardurile cu mașini sortate TOPSIS -->
-    </section>
-  </main>
+<footer>
+  &copy; 2025 &mdash; Configurarea mașinii tale · IAFPS · AC‑3 · AHP · TOPSIS · C++ &amp; WebAssembly.
+</footer>
 
-  <script src="cars.js"></script>
+<script src="algorithms.js"></script>
+<script src="app.js"></script>
 </body>
 </html>
